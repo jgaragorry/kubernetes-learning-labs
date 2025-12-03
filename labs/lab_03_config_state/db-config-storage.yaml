@@ -1,0 +1,74 @@
+---
+# -----------------------------------------------------------------------------
+# Componente 1: PersistentVolumeClaim (PVC) - Solicitud de Storage
+# -----------------------------------------------------------------------------
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: postgres-pvc
+  labels:
+    app: postgres-db
+spec:
+  # Mejor Práctica SRE: Define cómo se accede al volumen (lectura/escritura en un solo nodo).
+  accessModes:
+    - ReadWriteOnce 
+  # Minikube usa el storage-provisioner por defecto (habilitado en el LAB 01)
+  storageClassName: standard 
+  resources:
+    requests:
+      storage: 2Gi # Solicitamos 2 Gigabytes de almacenamiento
+---
+# -----------------------------------------------------------------------------
+# Componente 2: Deployment (PostgreSQL)
+# -----------------------------------------------------------------------------
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres-deployment
+  labels:
+    app: postgres-db
+spec:
+  replicas: 1 # Solo 1 réplica para una base de datos (evitar split-brain)
+  selector:
+    matchLabels:
+      app: postgres-db
+  template:
+    metadata:
+      labels:
+        app: postgres-db
+    spec:
+      containers:
+      - name: postgres-container
+        image: postgres:16-alpine # Usamos una versión ligera y estable
+        ports:
+        - containerPort: 5432
+        
+        # --- Configuración (DevSecOps) ---
+        env:
+          # 1. Montar ConfigMap (Variables NO sensibles)
+          - name: POSTGRES_DB
+            valueFrom:
+              configMapKeyRef:
+                name: postgres-config
+                key: POSTGRES_DB
+          # 2. Montar Secret (Credenciales SENSIBLES)
+          - name: POSTGRES_USER
+            valueFrom:
+              secretKeyRef:
+                name: postgres-secret
+                key: POSTGRES_USER
+          - name: POSTGRES_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: postgres-secret
+                key: POSTGRES_PASSWORD
+        
+        # --- Persistencia (SRE) ---
+        volumeMounts:
+        - mountPath: /var/lib/postgresql/data # Ruta interna donde DB guarda los datos
+          name: postgres-storage
+      
+      volumes:
+      - name: postgres-storage
+        persistentVolumeClaim:
+          claimName: postgres-pvc

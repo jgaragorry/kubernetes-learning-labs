@@ -1,0 +1,70 @@
+# -----------------------------------------------------------
+# IGNORAR ARCHIVOS Y DIRECTORIOS GENERADOS POR EL SISTEMA
+# -----------------------------------------------------------
+*~
+*.swp
+*.bak
+.DS_Store
+Thumbs.db
+
+# -----------------------------------------------------------
+# 1. IGNORAR ARCHIVOS DE ESTADO CRÍTICOS (DEVSECOPS)
+#    (No deben ser nunca públicos)
+# -----------------------------------------------------------
+
+# Terraform State Files (CRÍTICO)
+# Estos archivos contienen secretos, claves y el estado real de la infraestructura.
+**/*.tfstate
+**/*.tfstate.*
+.terraform/
+.terraform.lock.hcl  # Se puede incluir en control de versiones si se desea consistencia, pero se ignora por defecto en muchos proyectos
+.terraformrc
+
+# Kubeconfig Files (CRÍTICO)
+# Archivo de configuración de kubectl, contiene credenciales de acceso al clúster (AKS/Minikube).
+.kube/config
+
+# Credenciales de Cloud / Logs Sensibles
+.azure/
+.aws/
+.gcp/
+*.log
+*.output
+*.key
+*.pem
+*.pfx
+
+# -----------------------------------------------------------
+# 2. IGNORAR ARTEFACTOS DE TERRAFORM (LAB 05)
+# -----------------------------------------------------------
+
+# Binarios y archivos de planificación
+**/*.tfplan
+**/*.tfplan.backup
+**/*.tfvars # (Opcional, pero recomendado si contiene valores sensibles)
+.terraform/
+
+# Clave SSH generada por Terraform para AKS
+*.pub
+id_rsa
+id_rsa.pub
+
+# -----------------------------------------------------------
+# 3. IGNORAR ARTEFACTOS DE KUBERNETES / DOCKER
+# -----------------------------------------------------------
+
+# Logs, outputs y archivos temporales de kubectl
+*.kubeconfig
+helm.history
+
+# Docker (Imágenes y caché que no deben subirse)
+target/
+.dockerignore
+!Dockerfile
+!docker-compose.yaml
+
+# Binarios y scripts temporales (Archivos de trabajo local)
+*.out
+*.exe
+*.bin
+*.tmp

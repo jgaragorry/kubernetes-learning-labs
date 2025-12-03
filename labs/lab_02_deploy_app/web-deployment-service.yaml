@@ -1,0 +1,58 @@
+---
+# -----------------------------------------------------------------------------
+# Componente 1: Deployment (Gestión de la Aplicación)
+# -----------------------------------------------------------------------------
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web-hello-deployment
+  labels:
+    app: web-hello
+    env: dev
+spec:
+  # Mejor Práctica SRE: Define cuántas copias (réplicas) quieres.
+  # El Controller Manager mantendrá 3 Pods corriendo, garantizando resiliencia.
+  replicas: 3
+  selector:
+    matchLabels:
+      app: web-hello
+  template:
+    metadata:
+      labels:
+        app: web-hello
+    spec:
+      containers:
+      - name: web-hello-container
+        # Usamos una imagen ligera de Nginx para el laboratorio.
+        image: nginxdemos/hello
+        ports:
+        - containerPort: 80
+        # Práctica DevSecOps/SRE: Uso de límites de recursos
+        resources:
+          limits:
+            memory: "64Mi"
+            cpu: "250m"
+          requests:
+            memory: "32Mi"
+            cpu: "100m"
+---
+# -----------------------------------------------------------------------------
+# Componente 2: Service (Exposición de la Aplicación)
+# -----------------------------------------------------------------------------
+apiVersion: v1
+kind: Service
+metadata:
+  name: web-hello-service
+  labels:
+    app: web-hello
+spec:
+  # Tipo: NodePort es el más simple para exponer algo fuera de minikube.
+  # (Mejora: En la nube, usaríamos LoadBalancer).
+  type: NodePort
+  ports:
+    - port: 8080       # Puerto que escucha el Service (interno al clúster)
+      targetPort: 80   # Puerto del contenedor (el 80 de Nginx)
+      nodePort: 30000  # Puerto abierto en el host (WSL/minikube) - Rango 30000-32767
+  # El selector garantiza que el Service solo envíe tráfico a los Pods con esta etiqueta.
+  selector:
+    app: web-hello

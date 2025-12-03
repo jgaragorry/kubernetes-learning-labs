@@ -1,0 +1,35 @@
+# labs/lab_05_azure_aks/aks-web-app.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web-hello-deployment-aks
+  labels: {app: web-hello-aks}
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: web-hello-aks
+  template:
+    metadata:
+      labels:
+        app: web-hello-aks
+    spec:
+      containers:
+      - name: web-hello-container
+        image: nginxdemos/hello
+        ports:
+        - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: web-hello-service-aks
+  labels: {app: web-hello-aks}
+spec:
+  # CAMBIO CRÍTICO: Usamos LoadBalancer en la nube
+  type: LoadBalancer 
+  ports:
+    - port: 80
+      targetPort: 80
+  selector:
+    app: web-hello-aks

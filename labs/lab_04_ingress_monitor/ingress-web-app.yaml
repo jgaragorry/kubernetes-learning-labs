@@ -1,0 +1,26 @@
+---
+# -----------------------------------------------------------------------------
+# Componente 1: Ingress (Regla de Acceso)
+# -----------------------------------------------------------------------------
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: web-hello-ingress
+  labels:
+    app: web-hello
+  annotations:
+    # Usamos la clase de Ingress que Minikube instala (nginx)
+    ingress.kubernetes.io/default-backend: web-hello-service
+spec:
+  rules:
+  - host: "hello.devops.lab" # Dominio virtual que usaremos (Mejor Práctica)
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            # Apunta al Service creado en LAB 02
+            name: web-hello-service
+            port:
+              number: 8080 # Puerto interno del Service
