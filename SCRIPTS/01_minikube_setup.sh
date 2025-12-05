@@ -24,7 +24,7 @@ sudo apt update -y
 sudo apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 
 # 1.4. Agregar usuario al grupo docker (Permisos)
-if ! grep -q "docker" /etc/group | grep -q "$USER"; then
+if ! grep  "docker" /etc/group | grep  "$USER"; then
     echo "Agregando usuario $USER al grupo docker. Requiere re-login para aplicar."
     sudo usermod -aG docker $USER
 fi
